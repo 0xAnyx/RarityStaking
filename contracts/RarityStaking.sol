@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/interfaces/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "./RaritySigner.sol";
+import "hardhat/console.sol";
 
 contract RarityStaking is Ownable,RaritySigner{
 
@@ -79,14 +80,14 @@ contract RarityStaking is Ownable,RaritySigner{
 
     function raffleRoll(uint[] memory tokenIds) external{
         require(tokenIds.length < 60,"Can roll max 60");
-        uint random = uint(vrf());
         uint amount = 0;
         for(uint i=0;i<tokenIds.length;i++){
             require(stakedInfo[tokenIds[i]].owner == msg.sender,"Sender not owner");
             require(block.timestamp - stakedInfo[tokenIds[i]].lastRoll >= 12 hours,"Rolling too soon");
             stakedInfo[tokenIds[i]].lastRoll = block.timestamp;
             uint odds = 10000 + 20000*tokenRarity[tokenIds[i]]/2580383; //Max rarity - Min rarity = 2580383
-            uint mod = random%1000000;
+            console.log("Odds: -", odds);
+            uint mod = 1;
             if (mod < odds){
                 amount += raffleReward;
                 emit RaffleWin(msg.sender, tokenIds[i], true);
@@ -94,9 +95,9 @@ contract RarityStaking is Ownable,RaritySigner{
             else{
                 emit RaffleWin(msg.sender, tokenIds[i], false);
             }
-            random /= 10;
+//            random /= 10;
         }
-        RewardToken.transfer(msg.sender,amount);
+        RewardToken.transfer(msg.sender, amount);
     }
 
     function claimRewards(uint[] memory tokenIds) public {
@@ -146,18 +147,18 @@ contract RarityStaking is Ownable,RaritySigner{
         userStaked[msg.sender].pop();
     }
 
-    function vrf() private view returns (bytes32 result) {
-        uint256[1] memory bn;
-        bn[0] = block.number;
-        assembly {
-            let memPtr := mload(0x40)
-            if iszero(staticcall(not(0), 0xff, bn, 0x20, memPtr, 0x20)) {
-                invalid()
-            }
-            result := mload(memPtr)
-        }
-        return result;
-    }
+//    function vrf() private view returns (bytes32 result) {
+//        uint256[1] memory bn;
+//        bn[0] = block.number;
+//        assembly {
+//            let memPtr := mload(0x40)
+//            if iszero(staticcall(not(0), 0xff, bn, 0x20, memPtr, 0x20)) {
+//                invalid()
+//            }
+//            result := mload(memPtr)
+//        }
+//        return result;
+//    }
 
     function getUserStaked(address _user) external view returns(uint[] memory){
         return userStaked[_user];
