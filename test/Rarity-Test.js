@@ -101,12 +101,12 @@ describe('Rarity Staking Test Suite', async function(){
         await staking.updateRewards(ethers.utils.parseEther('2'));
         await staking.connect(bob).claimRewards([3]);
         let balanceOfReward4 = await token.balanceOf(bob.address);
-        console.log("Bob's balance after claiming for 3:-",
+        console.log("Bob's balance after claiming for 3 after changing rate but immediately:-",
             fromWei(balanceOfReward4.toString(),'ether'));
         await advanceTime(12 * 3600);
         await staking.connect(bob).claimRewards([3]);
         let balanceOfReward5 = await token.balanceOf(bob.address);
-        console.log("Bob's balance after claiming for 3:-",
+        console.log("Bob's balance after claiming for 3 after changing rate:-",
             fromWei(balanceOfReward5.toString(),'ether'));
         await advanceTime(12 * 3600);
     });
